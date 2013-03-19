@@ -85,21 +85,21 @@
     // You could limit the search to a region (e.g. a country) by appending more text to the query
 	// example: query = [NSString stringWithFormat:@"%@, Spain", text];
 	NSString *urlEncode = [query urlEncode];
-	NSString *urlString = [NSString stringWithFormat:@"http://maps.google.com/maps/geo?q=%@&hl=%@&oe=UTF8", urlEncode, [[NSLocale currentLocale] localeIdentifier]];
+	NSString *urlString = [NSString stringWithFormat:@"http://maps.googleapis.com/maps/api/geocode/json?address=%@&sensor=false&oe=UTF8", urlEncode];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
     
     AFJSONRequestOperation *operation = [AFJSONRequestOperation JSONRequestOperationWithRequest:request success:^(NSURLRequest *request, NSHTTPURLResponse *response, id JSON) {
         NSMutableArray* sug = [[NSMutableArray alloc] init];
         
-        NSArray* placemarks = [JSON objectForKey:@"Placemark"];
+        NSArray* placemarks = [JSON objectForKey:@"results"];
         
         for (NSDictionary* placemark in placemarks) {
-            NSString* address = [placemark objectForKey:@"address"];
+            NSString* address = [placemark objectForKey:@"formatted_address"];
             
-            NSDictionary* point = [placemark objectForKey:@"Point"];
-            NSArray* coordinates = [point objectForKey:@"coordinates"];
-            NSNumber* lon = [coordinates objectAtIndex:0];
-            NSNumber* lat = [coordinates objectAtIndex:1];
+            NSDictionary* point = [placemark objectForKey:@"geometry"];
+            NSArray* coordinates = [point objectForKey:@"location"];
+            NSNumber* lon = [coordinates valueForKey:@"lng"];
+            NSNumber* lat = [coordinates valueForKey:@"lat"];
             
             MKPointAnnotation* place = [[MKPointAnnotation alloc] init];
             place.title = address;
